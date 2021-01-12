@@ -1,0 +1,38 @@
+[
+    {
+        "id": "title",
+        "type": "text"
+    },
+    {
+        "id": "content",
+        "type": "text",
+        "subtype": "html",
+        "specialProperties": {
+            "mediaProperty": "attachments",
+            "supportsImages": true,
+            "supportsVideos": true,
+            "supportsFiles": true,
+            "supportsContainers": true,
+            "supportsCustom": true,
+            "supportsExternalLinks": true,
+            "supportsLinks": true,
+            "supportsQuote": true,
+            "supportsRichClasses": true,
+            "supportsTitle": true,
+            "supportsCustomStyles": true,
+            "supportsTemplating": true,
+            "supportsLists": true
+        }
+    },
+    {
+        "id": "attachments",
+        "type": "files",
+        "specialProperties": {
+            "smallDimension": "320x",
+            "mediumDimension": "640x",
+            "largeDimension": "1024x"
+        },
+        "hidden": true,
+        "nullable": true
+    }
+]

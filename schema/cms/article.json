@@ -1,0 +1,35 @@
+{
+    "type": "item",
+    "properties": [
+        {
+            "id": "locale",
+            "type": "string",
+            "subtype": "comprehensive-locale"
+        },
+        {
+            "id": "summary",
+            "type": "text",
+            "subtype": "plain",
+            "searchable": false
+        },
+        {
+            "id": "summary_image",
+            "type": "file",
+            "specialProperties": {
+                "imageUploader": true,
+                "smallDimension": "128x",
+                "mediumDimension": "256x",
+                "largeDimension": "512x"
+            },
+            "nullable": true
+        }
+    ],
+    "createRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "deleteRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "versioningRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "enableVersioning": true,
+    "versionIsLanguageAndCountry": true,
+    "versionIsLanguage": true,
+    "versionIsCountry": true
+}

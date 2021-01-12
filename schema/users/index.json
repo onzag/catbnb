@@ -1,0 +1,5 @@
+{
+    "type": "module",
+    "children": ["user"],
+    "searchable": false
+}

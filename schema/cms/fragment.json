@@ -1,0 +1,15 @@
+{
+    "type": "item",
+    "properties": [
+    ],
+    "createRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "deleteRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "versioningRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "customIdRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+    "enableVersioning": true,
+    "versionIsLanguageAndCountry": true,
+    "versionIsLanguage": true,
+    "versionIsCountry": true,
+    "searchable": false
+}

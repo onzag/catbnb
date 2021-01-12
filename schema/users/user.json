@@ -1,0 +1,165 @@
+{
+    "type": "item",
+    "properties": [
+        {
+            "id": "username",
+            "type": "string",
+            "subtype": "identifier",
+            "unique": true,
+            "nonCaseSensitiveUnique": true,
+            "htmlAutocomplete": "username"
+        },
+        {
+            "id": "app_language",
+            "type": "string",
+            "subtype": "language",
+            "hidden": true,
+            "searchable": false
+        },
+        {
+            "id": "app_country",
+            "type": "string",
+            "subtype": "country",
+            "hidden": true,
+            "searchable": false
+        },
+        {
+            "id": "app_currency",
+            "type": "string",
+            "subtype": "currency",
+            "hidden": true,
+            "searchable": false
+        },
+        {
+            "id": "email",
+            "type": "string",
+            "subtype": "email",
+            "searchable": false,
+            "nullable": true,
+            "readRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}",
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}"
+        },
+        {
+            "id": "e_validated",
+            "type": "boolean",
+            "nullable": true,
+            "default": false,
+            "searchable": false,
+            "createRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+            "coerceNullsIntoDefault": true
+        },
+        {
+            "id": "e_notifications",
+            "type": "boolean",
+            "default": true,
+            "nullable": true,
+            "searchable": false,
+            "readRoleAccess": ["&OWNER"],
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN', '&OWNER']}else{return ['&OWNER']}",
+            "coerceNullsIntoDefault": true
+        },
+        {
+            "id": "e_newsletter",
+            "type": "boolean",
+            "default": true,
+            "nullable": true,
+            "searchable": false,
+            "readRoleAccess": ["&OWNER"],
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN', '&OWNER']}else{return ['&OWNER']}",
+            "coerceNullsIntoDefault": true
+        },
+        {
+            "id": "password",
+            "type": "password",
+            "htmlAutocomplete": "current-password",
+            "disableRetrieval": true,
+            "readRoleAccess": [],
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN', '&OWNER']}else{return ['&OWNER']}"
+        },
+        {
+            "id": "role",
+            "type": "string",
+            "subtype": "role",
+            "values": "$CONFIG:return config.roles;",
+            "nullable": true,
+            "default": "$CONFIG:if(config.roles.includes('USER')){return 'USER'}else{return config.roles[0]}",
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+            "createRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['ADMIN']}else{return []}",
+            "coerceNullsIntoDefault": true
+        },
+        {
+            "id": "profile_picture",
+            "type": "file",
+            "specialProperties": {
+                "imageUploader": true,
+                "dimensions": "24 24x24 ; 48 48x48",
+                "smallDimension": "96x96",
+                "mediumDimension": "128x128",
+                "largeDimension": "256x256"
+            },
+            "nullable": true,
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}"
+        },
+        {
+            "id": "address",
+            "type": "location",
+            "nullable": true,
+            "readRoleAccess": ["&OWNER"],
+            "searchable": false,
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}"
+        },
+        {
+            "id": "about_me",
+            "type": "text",
+            "specialProperties": {
+                "supportsVideos": false,
+                "supportsImages": false,
+                "supportsFiles": false,
+                "supportsLists": false,
+                "supportsContainers": false,
+                "supportsCustom": false,
+                "supportsExternalLinks": true,
+                "supportsLinks": true,
+                "supportsQuote": false,
+                "supportsRichClasses": false,
+                "supportsTitle": true,
+                "supportsCustomStyles": false,
+                "supportsTemplating": false
+            },
+            "subtype": "html",
+            "nullable": true,
+            "searchable": false,
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}"
+        },
+        {
+            "id": "session_id",
+            "type": "integer",
+            "disableRetrieval": true,
+            "searchable": false,
+            "default": 0,
+            "nullable": true,
+            "hidden": true,
+            "coerceNullsIntoDefault": true,
+            "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}"
+        }
+    ],
+    "policies": {
+        "edit": {
+            "REQUIRES_PASSWORD_CONFIRMATION": {
+                "roles": "$CONFIG:return config.roles.filter((r) => r !== 'ADMIN');",
+                "properties": ["password"],
+                "applyingProperties": ["username", "password"]
+            }
+        },
+        "delete": {
+            "REQUIRES_PASSWORD_CONFIRMATION": {
+                "roles": "$CONFIG:return config.roles.filter((r) => r !== 'ADMIN');",
+                "properties": ["password"]
+            }
+        }
+    },
+    "createRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&GUEST', 'ADMIN']}else{return ['&GUEST']}",
+    "editRoleAccess":"$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}",
+    "ownerIsObjectId": true
+}

@@ -1,0 +1,10 @@
+{
+  "save": {
+    "cms": {
+      "fragment": true
+    }
+  },
+  "load": {
+    "primaryContainerId": "MAIN"
+  }
+}

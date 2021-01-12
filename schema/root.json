@@ -1,0 +1,8 @@
+{
+  "type": "root",
+  "children": [
+    "users",
+    "cms"
+  ],
+  "i18n": "main-i18n.properties"
+}
