@@ -1,0 +1,96 @@
+{
+    "type": "item",
+    "properties": [
+        {
+            "id": "title",
+            "type": "text"
+        },
+        {
+            "id": "description",
+            "type": "text",
+            "subtype": "html",
+            "specialProperties": {
+                "mediaProperty": "attachments",
+                "supportsImages": true,
+                "supportsVideos": true,
+                "supportsFiles": false,
+                "supportsContainers": false,
+                "supportsCustom": false,
+                "supportsExternalLinks": false,
+                "supportsLinks": false,
+                "supportsQuote": false,
+                "supportsRichClasses": false,
+                "supportsTitle": true,
+                "supportsCustomStyles": false,
+                "supportsTemplating": false,
+                "supportsLists": false
+            }
+        },
+        {
+            "id": "attachments",
+            "type": "files",
+            "specialProperties": {
+                "smallDimension": "320x",
+                "mediumDimension": "640x",
+                "largeDimension": "1024x"
+            },
+            "hidden": true,
+            "nullable": true
+        },
+        {
+            "id": "image",
+            "type": "file",
+            "specialProperties": {
+                "imageUploader": true,
+                "smallDimension": "128x",
+                "mediumDimension": "256x",
+                "largeDimension": "512x"
+            }
+        },
+        {
+            "id": "address",
+            "type": "location",
+            "specialProperties": {
+                "maxSearchRadius": 100,
+                "searchRadiusInitialPrefill": 50,
+                "searchRadiusUnit": "km",
+                "searchRadiusImperialUnit": "mi"
+            }
+        },
+        {
+            "id": "unit_type",
+            "type": "string",
+            "subtype": "exact-value",
+            "values": [
+                "room",
+                "apartment",
+                "house"
+            ]
+        },
+        {
+            "id": "booked",
+            "type": "boolean",
+            "hidden": true
+        },
+        {
+            "id": "booked_by",
+            "type": "string",
+            "subtype": "reference",
+            "nullable": true,
+            "specialProperties": {
+                "referencedModule": "users",
+                "referencedItemDefinition": "user",
+                "referencedSearchProperty": "username",
+                "referencedDisplayProperty": "username",
+                "referencedFilteringPropertySet": {
+                    "role": {
+                        "exactValue": "USER"
+                    }
+                }
+            },
+            "readRoleAccess": ["&OWNER"],
+            "editRoleAccess": [],
+            "searchable": false
+        }
+    ]
+}

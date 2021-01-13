@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@material-ui/icons": "^4.11.2",
     "@onzag/itemize": "0.0.125",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",

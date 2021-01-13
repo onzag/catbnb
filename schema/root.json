@@ -2,7 +2,8 @@
   "type": "root",
   "children": [
     "users",
-    "cms"
+    "cms",
+    "hosting"
   ],
   "i18n": "main-i18n.properties"
 }

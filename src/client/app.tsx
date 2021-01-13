@@ -23,6 +23,9 @@ import { LoginDialog } from "./components/login-dialog";
 import { SignupDialog } from "./components/signup-dialog";
 import { RecoverDialog } from "./components/recover-dialog";
 
+import HomeWorkIcon from "@material-ui/icons/HomeWork";
+import { Hosting } from "./pages/hosting";
+
 // Remember that when adding fast prototyping components they might demand
 // localization data, if you get an error named
 // Uncaught Error: Unknown key in context: xxxxxxx from localization.tsx
@@ -73,6 +76,17 @@ export const MENU_ENTRIES: IMenuEntry[] = [
       capitalize: true,
     },
   },
+  {
+    path: "/hosting",
+    icon: <HomeWorkIcon />,
+    module: "hosting",
+    idef: "unit",
+    i18nProps: {
+      id: "manage",
+      capitalize: true,
+    },
+    roles: ["USER", "ADMIN"],
+  },
 ];
 
 export default function App() {
@@ -117,6 +131,8 @@ export default function App() {
       <Route path="/privacy-policy" component={PrivacyPolicy}/>
       <Route path="/terms-and-conditions" component={TermsAndConditions}/>
       <Route path="/contact" component={Contact}/>
+
+      <Route path="/hosting" component={Hosting}/>
 
       <Footer/>
     </>
