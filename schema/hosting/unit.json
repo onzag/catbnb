@@ -55,7 +55,27 @@
                 "searchRadiusInitialPrefill": 50,
                 "searchRadiusUnit": "km",
                 "searchRadiusImperialUnit": "mi"
-            }
+            },
+            "searchInvalidIf": [
+                {
+                    "if": {
+                        "property": "created_by",
+                        "comparator": "equals",
+                        "value": {
+                            "exactValue": null
+                        },
+                        "gate": "and",
+                        "condition": {
+                            "property": "&this",
+                            "comparator": "equals",
+                            "value": {
+                                "exactValue": null
+                            }
+                        }
+                    },
+                    "error": "NEEDS_AN_ADDRESS"
+                }
+            ]
         },
         {
             "id": "unit_type",
