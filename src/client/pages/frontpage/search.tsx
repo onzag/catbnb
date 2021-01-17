@@ -22,8 +22,8 @@ const searchStyle = {
     padding: "0 1rem",
   },
   listing: {
-    transition: "background-color 0.3s",
-    cursor: "pointer",
+    "transition": "background-color 0.3s",
+    "cursor": "pointer",
     "&:hover": {
       backgroundColor: "#eee",
     },
@@ -51,7 +51,7 @@ export const Search = withStyles(searchStyle)((props: WithStyles<typeof searchSt
         searchCounterpart={true}
         properties={[
           "address",
-          "unit_type"
+          "unit_type",
         ]}
         cleanOnDismount={{
           cleanSearchResultsOnAny: true,
@@ -84,7 +84,7 @@ export const Search = withStyles(searchStyle)((props: WithStyles<typeof searchSt
                 nulls: "last",
               },
             },
-            storeResultsInNavigation: "frontpage-search"
+            storeResultsInNavigation: "frontpage-search",
           }}
         />
 
@@ -97,18 +97,21 @@ export const Search = withStyles(searchStyle)((props: WithStyles<typeof searchSt
                     <ItemProvider {...r.providerProps}>
                       <Link to={`/reserve/${r.id}`}>
                         <ListItem className={props.classes.listing}>
-                          <View id="image" rendererArgs={
-                            {
-                              // we do not want to link images with with <a> tags like
-                              // the active renderer does by default
-                              disableImageLinking: true,
-                              // we want the image size to load by 30 viewport width
-                              // this is used to choose what image resolution to load
-                              // so they load faster, we want tiny images
-                              imageSizes: "30vw",
-                              imageClassName: props.classes.image
+                          <View
+                            id="image"
+                            rendererArgs={
+                              {
+                                // we do not want to link images with with <a> tags like
+                                // the active renderer does by default
+                                disableImageLinking: true,
+                                // we want the image size to load by 30 viewport width
+                                // this is used to choose what image resolution to load
+                                // so they load faster, we want tiny images
+                                imageSizes: "30vw",
+                                imageClassName: props.classes.image,
+                              }
                             }
-                          } />
+                          />
                           <ListItemText
                             className={props.classes.listingText}
                             primary={<View id="title" />}

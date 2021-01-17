@@ -1,7 +1,8 @@
 {
     "type": "module",
     "children": [
-        "unit"
+        "unit",
+        "request"
     ],
     "searchable": true
 }

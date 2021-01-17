@@ -1,0 +1,72 @@
+{
+    "type": "item",
+    "properties": [
+        {
+            "id": "message",
+            "type": "text",
+            "subtype": "plain",
+            "nullable": true,
+            "searchable": false,
+            "maxLength": 255,
+            "minLength": 25
+        },
+        {
+            "id": "check_in",
+            "type": "date",
+            "invalidIf": [
+                {
+                    "if": {
+                        "property": "&this",
+                        "comparator": "less-than",
+                        "value": {
+                            "exactValue": "today"
+                        },
+                        "method": "date"
+                    },
+                    "error": "DATE_IS_IN_THE_PAST"
+                }
+            ],
+            "searchInvalidIf": []
+        },
+        {
+            "id": "check_out",
+            "type": "date",
+            "invalidIf": [
+                {
+                    "if": {
+                        "property": "&this",
+                        "comparator": "less-or-equal-than",
+                        "value": {
+                            "property": "check_in"
+                        },
+                        "method": "date"
+                    },
+                    "error": "CHECK_OUT_IN_THE_PAST_OR_SAME_DAY"
+                }
+            ]
+        },
+        {
+            "id": "status",
+            "type": "string",
+            "subtype": "exact-value",
+            "values": ["WAIT", "APPROVED", "DENIED"],
+            "default": "WAIT",
+            "coerceNullsIntoDefault": true,
+            "nullable": true,
+            "createRoleAccess": [],
+            "editRoleAccess": ["&ANYONE"]
+        }
+    ],
+    "requestLimiters": {
+        "condition": "AND",
+        "parenting": true
+    },
+    "mustBeParented": true,
+    "canBeParentedBy": [
+        {
+            "module": "hosting",
+            "item": "unit"
+        }
+    ],
+    "parentingRoleAccess": ["&ANYONE_LOGGED"]
+}

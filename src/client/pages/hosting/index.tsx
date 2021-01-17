@@ -11,7 +11,7 @@ import { SearchLoaderWithPagination } from "@onzag/itemize/client/fast-prototypi
 import View from "@onzag/itemize/client/components/property/View";
 import { List, ListItemText, IconButton, withStyles, WithStyles, createStyles, ListItem } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import Link from "@onzag/itemize/client/components/navigation/Link";
-import AddIcon from '@material-ui/icons/Add';
+import AddIcon from "@material-ui/icons/Add";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
 import SubmitActioner from "@onzag/itemize/client/components/item/SubmitActioner";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
@@ -23,7 +23,7 @@ import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar
  */
 const newHostingRedirectCallback = (data: IActionResponseWithId) => `/hosting/edit/${data.id}`;
 
-interface NewEditHostingProps {
+interface INewEditHostingProps {
   match: {
     params: {
       id: string;
@@ -34,7 +34,7 @@ interface NewEditHostingProps {
 /**
  * Page to add or edit a hosting unit
  */
-export function NewEditHosting(props: NewEditHostingProps) {
+export function NewEditHosting(props: INewEditHostingProps) {
   const idToEdit = props.match.params.id || null;
   return (
     <ItemProvider
@@ -51,7 +51,7 @@ export function NewEditHosting(props: NewEditHostingProps) {
         "image",
         "address",
         "unit_type",
-        "booked"
+        "booked",
       ]}
       // and we want to set the booked
       // property to false, it is not settable
@@ -60,7 +60,7 @@ export function NewEditHosting(props: NewEditHostingProps) {
         {
           id: "booked",
           value: false,
-        }
+        },
       ]}
     >
       <Entry id="unit_type" />
@@ -184,8 +184,8 @@ const unitListStyles = createStyles({
     padding: "0 1rem",
   },
   listing: {
-    transition: "background-color 0.3s",
-    cursor: "pointer",
+    "transition": "background-color 0.3s",
+    "cursor": "pointer",
     "&:hover": {
       backgroundColor: "#eee",
     },
@@ -195,7 +195,7 @@ const unitListStyles = createStyles({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
 });
 
 /**
@@ -243,7 +243,7 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
               // the results will be stored and as such we will be able to go
               // back and forth, this is often recommended, this id is just
               // a random unique id for the navigation
-              storeResultsInNavigation: "unit-search"
+              storeResultsInNavigation: "unit-search",
             }
           }
           // now we tell here what to load, we will use the same id
@@ -286,18 +286,21 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
                       <ItemProvider {...r.providerProps}>
                         <Link to={`/hosting/edit/${r.id}`}>
                           <ListItem className={props.classes.listing}>
-                            <View id="image" rendererArgs={
-                              {
-                                // we do not want to link images with with <a> tags like
-                                // the active renderer does by default
-                                disableImageLinking: true,
-                                // we want the image size to load by 30 viewport width
-                                // this is used to choose what image resolution to load
-                                // so they load faster, we want tiny images
-                                imageSizes: "30vw",
-                                imageClassName: props.classes.image
+                            <View
+                              id="image"
+                              rendererArgs={
+                                {
+                                  // we do not want to link images with with <a> tags like
+                                  // the active renderer does by default
+                                  disableImageLinking: true,
+                                  // we want the image size to load by 30 viewport width
+                                  // this is used to choose what image resolution to load
+                                  // so they load faster, we want tiny images
+                                  imageSizes: "30vw",
+                                  imageClassName: props.classes.image,
+                                }
                               }
-                            } />
+                            />
                             <ListItemText
                               className={props.classes.listingText}
                               primary={<View id="title" />}
@@ -318,5 +321,5 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
         </ItemProvider>
       )}
     </UserDataRetriever>
-  )
+  );
 });
