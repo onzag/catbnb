@@ -46,7 +46,6 @@ export function MyProfile() {
               itemDefinition="user"
               properties={properties}
               forId={userData.id}
-              assumeOwnership={true}
               includePolicies={true}
               longTermCaching={true}
               markForDestructionOnLogout={true}

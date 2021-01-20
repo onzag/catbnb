@@ -8,7 +8,8 @@
             "nullable": true,
             "searchable": false,
             "maxLength": 255,
-            "minLength": 25
+            "minLength": 25,
+            "editRoleAccess": []
         },
         {
             "id": "check_in",
@@ -26,7 +27,8 @@
                     "error": "DATE_IS_IN_THE_PAST"
                 }
             ],
-            "searchInvalidIf": []
+            "searchInvalidIf": [],
+            "editRoleAccess": []
         },
         {
             "id": "check_out",
@@ -43,7 +45,8 @@
                     },
                     "error": "CHECK_OUT_IN_THE_PAST_OR_SAME_DAY"
                 }
-            ]
+            ],
+            "editRoleAccess": []
         },
         {
             "id": "status",
@@ -54,7 +57,7 @@
             "coerceNullsIntoDefault": true,
             "nullable": true,
             "createRoleAccess": [],
-            "editRoleAccess": ["&ANYONE"]
+            "editRoleAccess": ["OWNER_OF_UNIT"]
         }
     ],
     "requestLimiters": {
@@ -68,5 +71,7 @@
             "item": "unit"
         }
     ],
-    "parentingRoleAccess": ["&ANYONE_LOGGED"]
+    "parentingRoleAccess": ["&ANYONE_LOGGED"],
+    "ownerReadRoleAccess": ["&OWNER", "OWNER_OF_UNIT"],
+    "editRoleAccess": ["OWNER_OF_UNIT"]
 }

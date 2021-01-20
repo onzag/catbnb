@@ -25,6 +25,7 @@ import { RecoverDialog } from "./components/recover-dialog";
 
 import HomeWorkIcon from "@material-ui/icons/HomeWork";
 import { Hosting } from "./pages/hosting";
+import { ReserveHosting } from "./pages/reserve";
 
 // Remember that when adding fast prototyping components they might demand
 // localization data, if you get an error named
@@ -133,6 +134,7 @@ export default function App() {
       <Route path="/contact" component={Contact}/>
 
       <Route path="/hosting" component={Hosting}/>
+      <Route path="/reserve/:id" component={ReserveHosting}/>
 
       <Footer/>
     </>
