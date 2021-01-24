@@ -79,6 +79,24 @@ const FRAGMENTS: { [key: string]: ITemplateArgsContext } = {
       },
     },
   },
+  "NOTIFICATION_EMAIL": {
+    type: "context",
+    label: "Request notification email",
+    properties: {
+      request_notification_requester: {
+        type: "text",
+        label: "Requester",
+      },
+      request_notification_check_in: {
+        type: "text",
+        label: "Check in time",
+      },
+      request_notification_check_out: {
+        type: "text",
+        label: "Check out time",
+      },
+    },
+  },
 }
 const ALL_FRAGMENTS = Object.keys(FRAGMENTS);
 

@@ -15,6 +15,7 @@ interface IReserveHostingProps {
   match: {
     params: {
       id: string;
+      rid: string;
     };
   };
 }
@@ -24,6 +25,7 @@ interface IReserveHostingProps {
  */
 export function ReserveHosting(props: IReserveHostingProps) {
   const idToReserve = props.match.params.id || null;
+  const reservationId = props.match.params.rid || null;
   const newRequestRedirectCallback = (data: IActionResponseWithId) => `/reserve/${idToReserve}/request/${data.id}`;
   return (
     <ModuleProvider module="hosting">
@@ -71,44 +73,63 @@ export function ReserveHosting(props: IReserveHostingProps) {
           "message",
           "check_in",
           "check_out",
+          "status",
         ]}
+        forId={reservationId}
       >
-        <Entry id="message" />
-        <Entry id="check_in" />
-        <Entry id="check_out" />
+        {
+          reservationId ?
+            <Typography variant="h3">
+              <View id="status" />
+            </Typography>
+            : null
+        }
+        {
+          reservationId ? <View id="message" /> : <Entry id="message" />
+        }
+        {
+          reservationId ? <View id="check_in" /> : <Entry id="check_in" />
+        }
+        {
+          reservationId ? <View id="check_out" /> : <Entry id="check_out" />
+        }
 
-        <SubmitButton
-          i18nId="request"
-          buttonColor="primary"
-          buttonVariant="contained"
-          options={{
-            properties: [
-              "message",
-              "check_in",
-              "check_out",
-            ],
-            restoreStateOnSuccess: true,
-            parentedBy: {
-              module: "hosting",
-              itemDefinition: "unit",
-              id: idToReserve,
-            }
-          }}
-          redirectOnSuccess={newRequestRedirectCallback}
-          redirectReplace={true}
-        />
-
-        <SubmitActioner>
-          {(actioner) => (
-            <Snackbar
-              id="request-error"
-              severity="error"
-              i18nDisplay={actioner.submitError}
-              open={!!actioner.submitError}
-              onClose={actioner.dismissError}
-            />
-          )}
-        </SubmitActioner>
+        {
+          !reservationId ?
+            <>
+              <SubmitButton
+                i18nId="request"
+                buttonColor="primary"
+                buttonVariant="contained"
+                options={{
+                  properties: [
+                    "message",
+                    "check_in",
+                    "check_out",
+                  ],
+                  restoreStateOnSuccess: true,
+                  parentedBy: {
+                    item: "hosting/unit",
+                    id: idToReserve,
+                  }
+                }}
+                redirectOnSuccess={newRequestRedirectCallback}
+                redirectReplace={true}
+              />
+              <SubmitActioner>
+                {(actioner) => (
+                  <Snackbar
+                    id="request-error"
+                    severity="error"
+                    i18nDisplay={actioner.submitError}
+                    open={!!actioner.submitError}
+                    onClose={actioner.dismissError}
+                  />
+                )}
+              </SubmitActioner>
+            </> :
+            null
+        }
       </ItemProvider>
     </ModuleProvider>
   );

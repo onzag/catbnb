@@ -12,6 +12,7 @@ import { PrivacyPolicy } from "./pages/privacy-policy";
 import { TermsAndConditions } from "./pages/terms-and-conditions";
 import { ResetPassword } from "./pages/reset-password";
 import { Profile } from "./pages/profile";
+import { Preferences } from "./pages/preferences";
 import { MyProfile } from "./pages/my-profile";
 import { ChangePassword } from "./pages/change-password";
 import { News } from "./pages/news";
@@ -24,8 +25,14 @@ import { SignupDialog } from "./components/signup-dialog";
 import { RecoverDialog } from "./components/recover-dialog";
 
 import HomeWorkIcon from "@material-ui/icons/HomeWork";
+import EventSeatIcon from '@material-ui/icons/EventSeat';
 import { Hosting } from "./pages/hosting";
 import { ReserveHosting } from "./pages/reserve";
+import { Reservations } from "./pages/reservations";
+import { ItemProvider } from "@onzag/itemize/client/providers/item";
+import UserDataRetriever from "@onzag/itemize/client/components/user/UserDataRetriever";
+import { ModuleProvider } from "@onzag/itemize/client/providers/module";
+import Reader from "@onzag/itemize/client/components/property/Reader";
 
 // Remember that when adding fast prototyping components they might demand
 // localization data, if you get an error named
@@ -45,7 +52,7 @@ import { ReserveHosting } from "./pages/reserve";
 export const MENU_ADMIN_ENTRIES: IMenuEntry[] = [
   {
     path: "/cms",
-    icon: <ImportantDevicesIcon/>,
+    icon: <ImportantDevicesIcon />,
     module: "cms",
     role: "ADMIN",
     i18nProps: {
@@ -80,10 +87,38 @@ export const MENU_ENTRIES: IMenuEntry[] = [
   {
     path: "/hosting",
     icon: <HomeWorkIcon />,
+    badgeContent: (
+      <UserDataRetriever>
+        {(userData) => (
+          <ModuleProvider module="users">
+            <ItemProvider
+              itemDefinition="user"
+              forId={userData.id}
+              properties={[
+                "pending_requests_count"
+              ]}
+            >
+              <Reader id="pending_requests_count">{(value: number) => (value || 0)}</Reader>
+            </ItemProvider>
+          </ModuleProvider>
+        )}
+      </UserDataRetriever>
+    ),
     module: "hosting",
     idef: "unit",
     i18nProps: {
       id: "manage",
+      capitalize: true,
+    },
+    roles: ["USER", "ADMIN"],
+  },
+  {
+    path: "/reservations",
+    icon: <EventSeatIcon />,
+    module: "hosting",
+    idef: "request",
+    i18nProps: {
+      id: "view_reservations",
       capitalize: true,
     },
     roles: ["USER", "ADMIN"],
@@ -118,25 +153,30 @@ export default function App() {
         }}
       />
 
-      <Route path="/" exact={true} component={Frontpage}/>
+      <Route path="/" exact={true} component={Frontpage} />
 
-      <Route path="/profile/:id" component={Profile}/>
-      <Route path="/my-profile" component={MyProfile}/>
-      <Route path="/news" component={News}/>
+      <Route path="/profile/:id" component={Profile} />
+      <Route path="/my-profile" component={MyProfile} />
+      <Route path="/preferences" component={Preferences} />
+      <Route path="/news" component={News} />
 
-      <Route path="/reset-password" component={ResetPassword}/>
-      <Route path="/change-password" component={ChangePassword}/>
+      <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/change-password" component={ChangePassword} />
 
-      <Route path="/cms" component={CMS}/>
+      <Route path="/cms" component={CMS} />
 
-      <Route path="/privacy-policy" component={PrivacyPolicy}/>
-      <Route path="/terms-and-conditions" component={TermsAndConditions}/>
-      <Route path="/contact" component={Contact}/>
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-and-conditions" component={TermsAndConditions} />
+      <Route path="/contact" component={Contact} />
 
-      <Route path="/hosting" component={Hosting}/>
-      <Route path="/reserve/:id" component={ReserveHosting}/>
+      <Route path="/hosting" component={Hosting} />
 
-      <Footer/>
+      <Route path="/reserve/:id" component={ReserveHosting} exact={true} />
+      <Route path="/reserve/:id/request/:rid" component={ReserveHosting} exact={true} />
+
+      <Route path="/reservations" component={Reservations} />
+
+      <Footer />
     </>
   );
 }

@@ -111,6 +111,15 @@
             "readRoleAccess": ["&OWNER"],
             "editRoleAccess": [],
             "searchable": false
+        },
+        {
+            "id": "pending_requests_count",
+            "type": "integer",
+            "default": 0,
+            "hidden": true,
+            "readRoleAccess": ["&OWNER"],
+            "createRoleAccess": [],
+            "editRoleAccess": []
         }
     ]
 }

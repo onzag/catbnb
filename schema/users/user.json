@@ -142,6 +142,15 @@
             "hidden": true,
             "coerceNullsIntoDefault": true,
             "editRoleAccess": "$CONFIG:if(config.roles.includes('ADMIN')){return ['&OWNER', 'ADMIN']}else{return ['&OWNER']}"
+        },
+        {
+            "id": "pending_requests_count",
+            "type": "integer",
+            "default": 0,
+            "hidden": true,
+            "readRoleAccess": ["&OWNER"],
+            "createRoleAccess": [],
+            "editRoleAccess": []
         }
     ],
     "policies": {

@@ -9,12 +9,202 @@ import UserDataRetriever from "@onzag/itemize/client/components/user/UserDataRet
 import Entry from "@onzag/itemize/client/components/property/Entry";
 import { SearchLoaderWithPagination } from "@onzag/itemize/client/fast-prototyping/components/search-loader-with-pagination";
 import View from "@onzag/itemize/client/components/property/View";
-import { List, ListItemText, IconButton, withStyles, WithStyles, createStyles, ListItem } from "@onzag/itemize/client/fast-prototyping/mui-core";
+import { List, ListItemText, IconButton, ListItem, Badge, createStyles, withStyles, WithStyles } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import AddIcon from "@material-ui/icons/Add";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
 import SubmitActioner from "@onzag/itemize/client/components/item/SubmitActioner";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
+import Reader from "@onzag/itemize/client/components/property/Reader";
+import SearchLoader from "@onzag/itemize/client/components/search/SearchLoader";
+
+/**
+ * Some styles for the list of units
+ */
+const viewHostingStyles = createStyles({
+  image: {
+    width: "30%",
+    display: "inline-block",
+  },
+  listingText: {
+    padding: "0 1rem",
+  },
+  listing: {
+    "transition": "background-color 0.3s",
+    "cursor": "pointer",
+    "&:hover": {
+      backgroundColor: "#eee",
+    },
+  },
+  paginator: {
+    paddingTop: "1rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
+interface IViewHostingProps extends WithStyles<typeof viewHostingStyles> {
+  match: {
+    params: {
+      id: string;
+    };
+  };
+}
+
+export const ViewHosting = withStyles(viewHostingStyles)((props: IViewHostingProps) => {
+  const idToView = props.match.params.id || null;
+
+  return (
+    <ItemProvider
+      itemDefinition="unit"
+      forId={idToView}
+      properties={[
+        "title",
+        "image",
+        "unit_type",
+      ]}
+    >
+      <View id="unit_type" />
+      <View id="title" />
+      <View id="image" />
+
+      <hr />
+
+      <ItemProvider
+        itemDefinition="request"
+        searchCounterpart={true}
+        properties={[
+          "status"
+        ]}
+        automaticSearchInstant={true}
+        automaticSearch={{
+          // on a traditional search by default the max amount
+          // of records you can pull is limited to 50, this can
+          // be changed but 50 will do right now
+          limit: 50,
+          offset: 0,
+          requestedProperties: [
+            "check_in",
+            "check_out",
+          ],
+          searchByProperties: [
+            "status",
+          ],
+          parentedBy: {
+            id: props.match.params.id,
+            version: null,
+            item: "hosting/unit"
+          },
+          // we are performing a traditional search,
+          // normally when itemize does a search it request
+          // a list of records and then requests each page
+          // one by one, this is good if you wish to only download
+          // what is necessary while keeping the search state to that
+          // point in time, however we will display all the results
+          // so we need all the data, in this case, it will be cheaper
+          // to use a traditional search
+          traditional: true,
+
+          // we will aso just for demonstration use a by parent listen policy
+          // which means that the search will be realtime as well, a traditional
+          // by parent search is expensive, and normally you wouldn't do that, you
+          // would want a standard search with a cachePolicy as well; anyway a by parent listen policy will update
+          // via the parent context, every time the parent gets added, deleted or modified a child
+          // the search considers itself obsolete, because it is a traditional search
+          // it has no other way to update other than by calling the server again
+          // if we had a cache policy it would actually figure out the difference and only
+          // request the new records, but we will study that on the optimization/offline sections
+          listenPolicy: "by-parent",
+        }}
+        cleanOnDismount={{
+          cleanStateOnAny: true,
+        }}
+      >
+        <Entry id="status" searchVariant="search" />
+
+        <List>
+          {/**
+         * Note how we use the standard search loader rather than a paged search loader
+         * this one is standard and not fast prototyping and it is what the paged loader
+         * is built upon, it also uses pages, but it has no pagination element built in
+         * because we are anyway displaying the entire thing, we will just use a page the exact
+         * size of our limit
+         */}
+          <SearchLoader
+            pageSize={50}
+            currentPage={0}
+
+            // we are making the search results be static and do not bind to listen for changes
+            // you might wonder how is this compatible with the listen realtime policy well this is because
+            // we are telling "individual" results not to update; the search loader keeps results up
+            // to date by itself because it listens to changes of the records as we have a listen policy
+            // so we should always use TOTAL when we are listening otherwise you are wasting memory cycles
+            static="TOTAL"
+          >
+            {(arg) => (
+              arg.searchRecords.map((r) => (
+                <ItemProvider {...r.providerProps}>
+                  <Link to={`/hosting/view/${idToView}/request/${r.id}`}>
+                    <ListItem className={props.classes.listing}>
+
+                      {/**
+                     * We will read the creator of this record
+                     */}
+                      <Reader id="created_by">
+                        {(createdBy: string) => (
+                          // and now we will render the item
+                          <ListItemText
+                            className={props.classes.listingText}
+                            primary={
+                              <ModuleProvider
+                                module="users"
+                              >
+                                <ItemProvider
+                                  itemDefinition="user"
+                                  properties={[
+                                    "username"
+                                  ]}
+                                  // wait and merge basically means collect as many of these as possible
+                                  // and request them all at once, this will prevent having to do a round
+                                  // trip per user, as the server is able to process many requests
+                                  // at once, it also ensures that if the user is the exact same, then no
+                                  // new request will be made and they'll use the same value, wait and merge
+                                  // is quite effective to reducing network requests, but it comes at a cost
+                                  // 70 ms of delay during collection
+                                  waitAndMerge={true}
+                                  forId={createdBy}
+
+                                  // the user contains an externally checked property (unique index)
+                                  // that is the username, and the item provider tries to determine
+                                  // if the state is adequate by default, this will cause a network
+                                  // request, that is totally unecessary because we don't care whether
+                                  // the username is unique or not, we aren't modifying it
+                                  disableExternalChecks={true}
+                                >
+                                  <View id="username" />
+                                </ItemProvider>
+                              </ModuleProvider>
+                            }
+                            secondary={
+                              <span>
+                                <View id="check_in" /><span>{" - "}</span><View id="check_out" />
+                              </span>
+                            }
+                          />
+                        )}
+                      </Reader>
+                    </ListItem>
+                  </Link>
+                </ItemProvider>
+              ))
+            )}
+          </SearchLoader>
+        </List>
+      </ItemProvider>
+    </ItemProvider>
+  );
+});
 
 /**
  * triggers when sucesfully created a new hosting unit
@@ -164,6 +354,11 @@ export function Hosting() {
         component={NewEditHosting}
       />
       <Route
+        path="/hosting/view/:id"
+        exact={true}
+        component={ViewHosting}
+      />
+      <Route
         path="/hosting/edit/:id"
         exact={true}
         component={NewEditHosting}
@@ -230,6 +425,7 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
                 "title",
                 "address",
                 "image",
+                "pending_requests_count",
               ],
               // we start from offset 0
               offset: 0,
@@ -238,26 +434,11 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
               limit: 500,
               // we specify that the creator must be us
               createdBy: userData.id,
-              // and we want the search results to be stored
-              // in the navigation itself, when the search is done
-              // the results will be stored and as such we will be able to go
-              // back and forth, this is often recommended, this id is just
-              // a random unique id for the navigation
-              storeResultsInNavigation: "unit-search",
             }
           }
-          // now we tell here what to load, we will use the same id
-          // as before, the item will avoid search if it finds that a search
-          // result already exists in navigation, and will load from there
-          // note that searches are entire stateful values and will
-          // affect even the values of entries, so our text field id="title"
-          // will be affected to reflect the search
-          loadSearchFromNavigation="unit-search"
           // this is the memory management that is defined in itemize itself
           // itemize will cache on memory unless told to release such data
-          // this is useful, for example, for some forms, that you might just
-          // want to keep on the same value forever, but in this case, we want to wipe
-          // anyway search results will be stored in navigation history
+          // this is useful
           cleanOnDismount={{
             cleanSearchResultsOnAny: true,
           }}
@@ -284,30 +465,36 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
                   {
                     arg.searchRecords.map((r) => (
                       <ItemProvider {...r.providerProps}>
-                        <Link to={`/hosting/edit/${r.id}`}>
-                          <ListItem className={props.classes.listing}>
-                            <View
-                              id="image"
-                              rendererArgs={
-                                {
-                                  // we do not want to link images with with <a> tags like
-                                  // the active renderer does by default
-                                  disableImageLinking: true,
-                                  // we want the image size to load by 30 viewport width
-                                  // this is used to choose what image resolution to load
-                                  // so they load faster, we want tiny images
-                                  imageSizes: "30vw",
-                                  imageClassName: props.classes.image,
-                                }
-                              }
-                            />
-                            <ListItemText
-                              className={props.classes.listingText}
-                              primary={<View id="title" />}
-                              secondary={<View id="address" rendererArgs={{ hideMap: true }} />}
-                            />
-                          </ListItem>
-                        </Link>
+                        <Reader id="pending_requests_count">
+                          {(count: number) => (
+                            <Badge color="primary" badgeContent={count || 0}>
+                              <Link to={`/hosting/view/${r.id}`}>
+                                <ListItem className={props.classes.listing}>
+                                  <View
+                                    id="image"
+                                    rendererArgs={
+                                      {
+                                        // we do not want to link images with with <a> tags like
+                                        // the active renderer does by default
+                                        disableImageLinking: true,
+                                        // we want the image size to load by 30 viewport width
+                                        // this is used to choose what image resolution to load
+                                        // so they load faster, we want tiny images
+                                        imageSizes: "30vw",
+                                        imageClassName: props.classes.image,
+                                      }
+                                    }
+                                  />
+                                  <ListItemText
+                                    className={props.classes.listingText}
+                                    primary={<View id="title" />}
+                                    secondary={<View id="address" rendererArgs={{ hideMap: true }} />}
+                                  />
+                                </ListItem>
+                              </Link>
+                            </Badge>
+                          )}
+                        </Reader>
                       </ItemProvider>
                     ))
                   }
