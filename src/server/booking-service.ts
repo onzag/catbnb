@@ -26,6 +26,8 @@ export default class BookingService extends ServiceProvider<null> {
       }
     );
 
+    // we are going to pick all approved requests that exist within the requests
+    // within the check in and out date
     const allActiveRequests: ISQLTableRowValue[] = await this.globalRawDB.performRawDBSelect(
       "hosting/request",
       (selecter) => {
@@ -37,12 +39,16 @@ export default class BookingService extends ServiceProvider<null> {
       }
     );
 
+    // and then we are going to update the units with that data
     for (const activeRequest of allActiveRequests) {
+      // we will use performBatchRawDBUpdate rather than a single row update
+      // because we will be updating 0 or 1 row, so we have a different criteria
+      // than just id and version
       await this.globalRawDB.performBatchRawDBUpdate(
         "hosting/unit",
         {
           whereCriteriaSelector: (qb) => {
-            qb.andWhereColumn("id", activeRequest.parent_id).andWhereColumn("version", "").andWhereColumn("booked", null)
+            qb.andWhereColumn("id", activeRequest.parent_id).andWhereColumn("version", "").andWhereColumn("booked", false);
           },
           itemTableUpdate: {
             booked: true,

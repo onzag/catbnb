@@ -9,7 +9,7 @@ import UserDataRetriever from "@onzag/itemize/client/components/user/UserDataRet
 import Entry from "@onzag/itemize/client/components/property/Entry";
 import { SearchLoaderWithPagination } from "@onzag/itemize/client/fast-prototyping/components/search-loader-with-pagination";
 import View from "@onzag/itemize/client/components/property/View";
-import { List, ListItemText, IconButton, ListItem, Badge, createStyles, withStyles, WithStyles, EditIcon, DoneOutlineIcon } from "@onzag/itemize/client/fast-prototyping/mui-core";
+import { List, ListItemText, IconButton, ListItem, Badge, createStyles, withStyles, WithStyles, EditIcon, DoneOutlineIcon, Typography } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import AddIcon from "@material-ui/icons/Add";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
@@ -201,6 +201,9 @@ export const ViewHosting = withStyles(viewHostingStyles)((props: IViewHostingPro
         "title",
         "image",
         "unit_type",
+        "booked",
+        "booked_until",
+        "booked_by",
       ]}
     >
       <Link to={`/hosting/edit/${idToView}`}>
@@ -212,6 +215,26 @@ export const ViewHosting = withStyles(viewHostingStyles)((props: IViewHostingPro
       <View id="unit_type" />
       <View id="title" />
       <View id="image" />
+
+      <Reader id="booked">
+        {(booked: boolean) => {
+          if (!booked) {
+            return null;
+          }
+
+          return (
+            <Typography variant="body1" color="textSecondary">
+              <I18nRead
+                id="booked"
+                args={[
+                  <View id="booked_by" />,
+                  <View id="booked_until" />
+                ]}
+              />
+            </Typography>
+          );
+        }}
+      </Reader>
 
       <hr />
 
