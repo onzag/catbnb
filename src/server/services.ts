@@ -1,4 +1,5 @@
 import { IServiceCustomizationType } from "@onzag/itemize/server";
+import BookingService from "./booking-service";
 
 // within this file you can change your service providers
 // this file is dinamically imported by the server and other
@@ -9,7 +10,9 @@ import { IServiceCustomizationType } from "@onzag/itemize/server";
 // this file enables to specify custom services eg. for email sending
 // storage, and others, if left emtpy it will use the itemize defaults
 const services: IServiceCustomizationType = {
-
+  customServices: {
+    bookingService: BookingService,
+  }
 };
 
 // this export being the default is important

@@ -113,6 +113,14 @@
             "searchable": false
         },
         {
+            "id": "booked_until",
+            "type": "date",
+            "readRoleAccess": ["&OWNER"],
+            "editRoleAccess": [],
+            "nullable": true,
+            "searchable": false
+        },
+        {
             "id": "pending_requests_count",
             "type": "integer",
             "default": 0,
@@ -120,6 +128,52 @@
             "readRoleAccess": ["&OWNER"],
             "createRoleAccess": [],
             "editRoleAccess": []
+        },
+        {
+            "id": "planned_check_in",
+            "type": "date",
+            "nullable": true,
+            "invalidIf": [
+                {
+                    "if": {
+                        "property": "&this",
+                        "comparator": "less-than",
+                        "value": {
+                            "exactValue": "today"
+                        },
+                        "method": "date"
+                    },
+                    "error": "DATE_IS_IN_THE_PAST"
+                }
+            ],
+            "searchOnlyProperty": true
+        },
+        {
+            "id": "planned_check_out",
+            "type": "date",
+            "nullable": true,
+            "invalidIf": [
+                {
+                    "if": {
+                        "property": "&this",
+                        "comparator": "less-or-equal-than",
+                        "value": {
+                            "property": "planned_check_in"
+                        },
+                        "method": "date"
+                    },
+                    "error": "CHECK_OUT_IN_THE_PAST_OR_SAME_DAY"
+                }
+            ],
+            "searchOnlyProperty": true
+        },
+        {
+            "id": "price",
+            "type": "currency",
+            "nullable": true,
+            "specialProperties": {
+                "preventZero": true
+            }
         }
     ]
 }

@@ -147,10 +147,12 @@
             "id": "pending_requests_count",
             "type": "integer",
             "default": 0,
+            "nullable": true,
             "hidden": true,
             "readRoleAccess": ["&OWNER"],
             "createRoleAccess": [],
-            "editRoleAccess": []
+            "editRoleAccess": [],
+            "coerceNullsIntoDefault": true
         }
     ],
     "policies": {

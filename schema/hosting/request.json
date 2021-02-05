@@ -22,7 +22,8 @@
                         "value": {
                             "exactValue": "today"
                         },
-                        "method": "date"
+                        "method": "date",
+                        "serverFlag": "CREATE_ONLY"
                     },
                     "error": "DATE_IS_IN_THE_PAST"
                 }
@@ -41,7 +42,8 @@
                         "value": {
                             "property": "check_in"
                         },
-                        "method": "date"
+                        "method": "date",
+                        "serverFlag": "CREATE_ONLY"
                     },
                     "error": "CHECK_OUT_IN_THE_PAST_OR_SAME_DAY"
                 }

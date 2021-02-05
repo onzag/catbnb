@@ -9,7 +9,7 @@ import UserDataRetriever from "@onzag/itemize/client/components/user/UserDataRet
 import Entry from "@onzag/itemize/client/components/property/Entry";
 import { SearchLoaderWithPagination } from "@onzag/itemize/client/fast-prototyping/components/search-loader-with-pagination";
 import View from "@onzag/itemize/client/components/property/View";
-import { List, ListItemText, IconButton, ListItem, Badge, createStyles, withStyles, WithStyles } from "@onzag/itemize/client/fast-prototyping/mui-core";
+import { List, ListItemText, IconButton, ListItem, Badge, createStyles, withStyles, WithStyles, EditIcon, DoneOutlineIcon } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import AddIcon from "@material-ui/icons/Add";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
@@ -17,6 +17,144 @@ import SubmitActioner from "@onzag/itemize/client/components/item/SubmitActioner
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
 import Reader from "@onzag/itemize/client/components/property/Reader";
 import SearchLoader from "@onzag/itemize/client/components/search/SearchLoader";
+import { Avatar } from "../../components/avatar";
+
+interface IApproveDenyRequestProps {
+  match: {
+    params: {
+      id: string;
+      rid: string;
+    };
+  };
+}
+
+export function ApproveDenyRequest(props: IApproveDenyRequestProps) {
+  const unitId = props.match.params.id;
+  const requestId = props.match.params.rid;
+
+  return (
+    <ItemProvider
+      itemDefinition="unit"
+      forId={unitId}
+      properties={[
+        "title",
+        "image",
+        "unit_type",
+      ]}
+    >
+      <View id="unit_type" />
+      <View id="title" />
+      <View id="image" />
+
+      <hr />
+
+      <ItemProvider
+        itemDefinition="request"
+        forId={requestId}
+        properties={[
+          "message",
+          "check_in",
+          "check_out",
+          "status",
+        ]}
+      >
+        <Reader id="created_by">
+          {(createdBy: string) => (
+            <ModuleProvider
+              module="users"
+            >
+              <ItemProvider
+                itemDefinition="user"
+                properties={[
+                  "username",
+                  "profile_picture",
+                  "app_country",
+                  "role",
+                ]}
+                forId={createdBy}
+                disableExternalChecks={true}
+              >
+                <Avatar size="large" hideFlag={true} fullWidth={true} />
+                <View id="username" />
+              </ItemProvider>
+            </ModuleProvider>
+          )}
+        </Reader>
+
+        <View id="message" />
+        <View id="check_in" />
+        <View id="check_out" />     
+        <View id="status" />
+
+        <Reader id="status">
+          {(status: string) => {
+            if (status === "WAIT") {
+              return (
+                <>
+                  <hr />
+                  <SubmitButton
+                    i18nId="approve"
+                    options={{
+                      properties: [
+                        "status",
+                      ],
+                      unpokeAfterSuccess: true,
+                      propertyOverrides: [{
+                        id: "status",
+                        value: "APPROVED",
+                      }],
+                    }}
+                    buttonVariant="contained"
+                    buttonColor="primary"
+                    buttonStartIcon={<DoneOutlineIcon />}
+                  />
+                  <SubmitButton
+                    i18nId="deny"
+                    options={{
+                      properties: [
+                        "status",
+                      ],
+                      unpokeAfterSuccess: true,
+                      propertyOverrides: [{
+                        id: "status",
+                        value: "DENIED",
+                      }],
+                    }}
+                    buttonVariant="contained"
+                    buttonColor="secondary"
+                    buttonStartIcon={<DoneOutlineIcon />}
+                  />
+                </>
+              );
+            }
+            return null;
+          }}
+        </Reader>
+
+        <SubmitActioner>
+          {(actioner) => (
+            <>
+              <Snackbar
+                id="request-update-error"
+                severity="error"
+                i18nDisplay={actioner.submitError}
+                open={!!actioner.submitError}
+                onClose={actioner.dismissError}
+              />
+              <Snackbar
+                id="request-update-success"
+                severity="success"
+                i18nDisplay="change_success"
+                open={actioner.submitted}
+                onClose={actioner.dismissSubmitted}
+              />
+            </>
+          )}
+        </SubmitActioner>
+      </ItemProvider>
+    </ItemProvider>
+  );
+}
 
 /**
  * Some styles for the list of units
@@ -65,6 +203,12 @@ export const ViewHosting = withStyles(viewHostingStyles)((props: IViewHostingPro
         "unit_type",
       ]}
     >
+      <Link to={`/hosting/edit/${idToView}`}>
+        <IconButton>
+          <EditIcon />
+        </IconButton>
+      </Link>
+
       <View id="unit_type" />
       <View id="title" />
       <View id="image" />
@@ -242,6 +386,8 @@ export function NewEditHosting(props: INewEditHostingProps) {
         "address",
         "unit_type",
         "booked",
+        // we added the price
+        "price",
       ]}
       // and we want to set the booked
       // property to false, it is not settable
@@ -258,6 +404,8 @@ export function NewEditHosting(props: INewEditHostingProps) {
       <Entry id="description" />
       <Entry id="image" />
       <Entry id="address" />
+      {/* We add the entry for the price */}
+      <Entry id="price" />
 
       {/* The submit button is a fast prototyping component
       that implements the standard SubmitActioner component
@@ -277,6 +425,8 @@ export function NewEditHosting(props: INewEditHostingProps) {
             "address",
             "unit_type",
             "booked",
+            // we add the price in the properties to submit too
+            "price",
           ],
           // we will only submit differing properties
           // if we are editing, it makes no sense to
@@ -357,6 +507,11 @@ export function Hosting() {
         path="/hosting/view/:id"
         exact={true}
         component={ViewHosting}
+      />
+      <Route
+        path="/hosting/view/:id/request/:rid"
+        exact={true}
+        component={ApproveDenyRequest}
       />
       <Route
         path="/hosting/edit/:id"

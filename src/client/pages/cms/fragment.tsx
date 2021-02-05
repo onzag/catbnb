@@ -97,6 +97,26 @@ const FRAGMENTS: { [key: string]: ITemplateArgsContext } = {
       },
     },
   },
+  "APPROVAL_EMAIL": {
+    type: "context",
+    label: "Request approval email",
+    properties: {
+      request_notification_host: {
+        type: "text",
+        label: "Host",
+      },
+    },
+  },
+  "DENIAL_EMAIL": {
+    type: "context",
+    label: "Request denial email",
+    properties: {
+      request_notification_host: {
+        type: "text",
+        label: "Host",
+      },
+    },
+  },
 }
 const ALL_FRAGMENTS = Object.keys(FRAGMENTS);
 

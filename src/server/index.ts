@@ -8,7 +8,7 @@ import { rendererContext } from "@onzag/itemize/client/fast-prototyping/renderer
 import { appWrapper, mainWrapper } from "@onzag/itemize/client/fast-prototyping/wrappers";
 import { styleCollector } from "@onzag/itemize/client/fast-prototyping/collectors";
 import { IOTriggerActions } from "@onzag/itemize/server/resolvers/triggers";
-import { CONNECTOR_SQL_COLUMN_ID_FK_NAME, CONNECTOR_SQL_COLUMN_VERSION_FK_NAME } from "@onzag/itemize/constants";
+import ItemDefinition from "@onzag/itemize/base/Root/Module/ItemDefinition";
 
 // Itemize server isn't hot, it won't refresh in realtime and it
 // isn't recommended to attempt to set it up that way
@@ -65,7 +65,7 @@ initializeServer(
     customRoles: [
       {
         role: "OWNER_OF_UNIT",
-        item: ["unit"],
+        item: ["request"],
         module: ["hosting"],
         grant: async (arg) => {
           // if there's no parent
@@ -105,6 +105,32 @@ initializeServer(
     ],
     customTriggers: {
       item: {
+        search: {
+          "hosting/unit": async (arg) => {
+            const request: ItemDefinition = arg.appData.root.registry["hosting/request"] as ItemDefinition;
+            if (arg.args.planned_check_in && arg.args.planned_check_out) {
+              arg.whereBuilder.andWhereNotExists((subquery) => {
+                subquery.selectAll();
+                subquery.fromBuilder.from(request.getTableName());
+                subquery.whereBuilder.andWhereColumn("status", "APPROVED");
+                subquery.whereBuilder.andWhere((subclause) => {
+                  subclause.orWhere((internalClause) => {
+                    internalClause.andWhereColumn("check_in", "<=", arg.args.planned_check_in as string);
+                    internalClause.andWhereColumn("check_out", ">", arg.args.planned_check_in as string);
+                  });
+                  subclause.orWhere((internalClause) => {
+                    internalClause.andWhereColumn("check_in", "<", arg.args.planned_check_out as string);
+                    internalClause.andWhereColumn("check_out", ">=", arg.args.planned_check_out as string);
+                  });
+                  subclause.orWhere((internalClause) => {
+                    internalClause.andWhereColumn("check_in", ">=", arg.args.planned_check_in as string);
+                    internalClause.andWhereColumn("check_out", "<=", arg.args.planned_check_out as string);
+                  });
+                });
+              });
+            }
+          },
+        },
         io: {
           "hosting/request": async (arg) => {
             // this will trigger before creating when
@@ -112,26 +138,32 @@ initializeServer(
             if (arg.action === IOTriggerActions.CREATE) {
               const checkIn: string = arg.requestedUpdate.check_in as string;
               const checkOut: string = arg.requestedUpdate.check_out as string;
-              // The CONNECTOR_SQL_COLUMN_ID_FK_NAME is basically the id, remember that item definition
-              // data has its own table and module as well, but we want to be cheap and not do a join
-              // so we will use this reference to the foreign key of the id because we are cheap
-              const oneOverlappingRequest = await arg.appData.knex.first(CONNECTOR_SQL_COLUMN_ID_FK_NAME)
-                // the table name is the qualified name
-                .from(arg.itemDefinition.getQualifiedPathName())
-                // and we are going to search for an overlap between check in and check out
-                .where("status", "APPROVED")
-                .andWhere((clause) => {
-                  clause.where((subclause) => {
-                    subclause.where("check_in", ">=", checkIn).andWhere("check_out", "<", checkIn);
-                  }).orWhere((subclause) => {
-                    subclause.where("check_in", ">", checkOut).andWhere("check_out", "<=", checkOut);
+              const overlappingRequests = await arg.appData.rawDB.performRawDBSelect(
+                "hosting/request",
+                (selecter) => {
+                  selecter.select("id").limit(1);
+                  // and we are going to search for an overlap between check in and check out
+                  selecter.whereBuilder.andWhereColumn("status", "APPROVED");
+                  selecter.whereBuilder.andWhere((clause) => {
+                    clause.orWhere((subclause) => {
+                      subclause.andWhereColumn("check_in", "<=", checkIn).andWhereColumn("check_out", ">", checkIn);
+                    }).orWhere((subclause) => {
+                      subclause.andWhereColumn("check_in", "<", checkOut).andWhereColumn("check_out", ">=", checkOut);
+                    }).orWhere((subclause) => {
+                      subclause.andWhereColumn("check_in", ">=", checkIn).andWhereColumn("check_out", "<=", checkOut);
+                    });
                   });
-                });
+                  selecter.whereBuilder.andWhereColumn("parent_id", arg.requestedUpdate.parent_id as string);
+                }
+              );
 
-              if (oneOverlappingRequest) {
+              if (overlappingRequests.length) {
                 // we put the id in the error message, the user doesn't see forbidden messages anyway
                 // but it's good for debugging
-                arg.forbid("This request is overlapping with another request " + oneOverlappingRequest[CONNECTOR_SQL_COLUMN_ID_FK_NAME])
+                arg.forbid(
+                  "This request is overlapping with an approved request " + overlappingRequests[0].id,
+                  "OVERLAPPING_REQUEST",
+                );
               }
             }
 
@@ -143,6 +175,42 @@ initializeServer(
                 arg.originalValue.status !== "WAIT"
               ) {
                 arg.forbid("You cannot change the status once it has been approved or denied");
+              }
+
+              // so when we are updating a request
+              // into being approved
+              if (
+                arg.requestedUpdate.status &&
+                arg.requestedUpdate.status === "APPROVED"
+              ) {
+                const checkIn: string = arg.originalValue.check_in as string;
+                const checkOut: string = arg.originalValue.check_out as string;
+
+                const overlappingRequests = await arg.appData.rawDB.performRawDBSelect(
+                  "hosting/request",
+                  (selecter) => {
+                    selecter.select("id").limit(1);
+                    // and we are going to search for an overlap between check in and check out
+                    selecter.whereBuilder.andWhereColumn("status", "APPROVED");
+                    selecter.whereBuilder.andWhere((clause) => {
+                      clause.orWhere((subclause) => {
+                        subclause.andWhereColumn("check_in", "<=", checkIn).andWhereColumn("check_out", ">", checkIn);
+                      }).orWhere((subclause) => {
+                        subclause.andWhereColumn("check_in", "<", checkOut).andWhereColumn("check_out", ">=", checkOut);
+                      }).orWhere((subclause) => {
+                        subclause.andWhereColumn("check_in", ">=", checkIn).andWhereColumn("check_out", "<=", checkOut);
+                      });
+                    });
+                    selecter.whereBuilder.andWhereColumn("parent_id", arg.originalValue.parent_id as string);
+                  }
+                );
+
+                if (overlappingRequests.length) {
+                  arg.forbid(
+                    "This request is overlapping with an approved request " + overlappingRequests[0].id,
+                    "OVERLAPPING_REQUEST",
+                  );
+                }
               }
             }
 
@@ -229,7 +297,7 @@ initializeServer(
                     // but we are just going to leave it like this
                     // a count itself would be better for consistency
                     // but this is just for a tutorial
-                    pending_requests_count: arg.appData.knex.raw("?? + 1", "pending_requests_count"),
+                    pending_requests_count: [`"pending_requests_count" + 1`, []],
                   }
                 }
               );
@@ -239,7 +307,7 @@ initializeServer(
                 targetUser.version,
                 {
                   itemTableUpdate: {
-                    pending_requests_count: arg.appData.knex.raw("?? + 1", "pending_requests_count"),
+                    pending_requests_count: [`"pending_requests_count" + 1`, []],
                   }
                 }
               );
@@ -249,7 +317,7 @@ initializeServer(
               arg.action === IOTriggerActions.EDITED &&
               arg.originalValue.status === "WAIT" &&
               arg.newValue.status !== "WAIT"
-            ) {
+            ) {
               // yes we can grab the updated value from here, while you might wonder
               // why is itemize fetching the entire thing, well, in order to update
               // the caches.
@@ -259,22 +327,73 @@ initializeServer(
                 arg.newValue.parent_version as string,
                 {
                   itemTableUpdate: {
-                    pending_requests_count: arg.appData.knex.raw("?? - 1", "pending_requests_count"),
+                    pending_requests_count: [`"pending_requests_count" - 1`, []],
                   }
                 }
               );
 
               // so we can use the creator on a new raw database update
-              await arg.appData.rawDB.performRawDBUpdate(
+              const hostingUser = await arg.appData.rawDB.performRawDBUpdate(
                 "users/user",
                 hostingUnit.created_by,
                 null,
                 {
                   itemTableUpdate: {
-                    pending_requests_count: arg.appData.knex.raw("?? - 1", "pending_requests_count"),
+                    pending_requests_count: [`"pending_requests_count" - 1`, []],
                   }
                 }
               );
+
+              const requesterUser = await arg.appData.cache.requestValue(
+                "users/user",
+                // this is the request, the arg.newValue
+                arg.newValue.created_by as string,
+                null,
+              );
+
+              const requestIdef = arg.appData.root.registry["hosting/request"];
+              const i18nData = requestIdef.getI18nDataFor(requesterUser.app_language);
+
+              arg.appData.mailService.sendTemplateEmail({
+                // this is the email handle to be sent from [user]@mysite.com
+                fromEmailHandle: i18nData.custom.request_notification_email_handle,
+                // this is the username that it will be sent as
+                fromUsername: i18nData.custom.request_notification_email_username,
+                // the subject line
+                subject: localeReplacer(
+                  arg.newValue.status === "APPROVED" ?
+                    i18nData.custom.request_approved_notification_email_subject :
+                    i18nData.custom.request_denied_notification_email_subject,
+                  hostingUnit.title,
+                ),
+                // whether the user can unsubscribe via email address, allow users
+                // to unsubscribe as a norm unless they are very critical emails
+                canUnsubscribe: true,
+                // where is the subscription state stored, we will reuse the e_notifications
+                // boolean that exist within the user, if this boolean is false, the email
+                // won't be sent because the user is unsubscribed
+                subscribeProperty: "e_notifications",
+                // the unsubscription email will be sent, but it will not check if the user
+                // is unsubscribed
+                ignoreUnsubscribe: false,
+                // other important properties in order to send the message, we want to ensure
+                // the user is validated and not just spam
+                confirmationProperties: ["e_validated"],
+                // arguments to render the template
+                args: {
+                  request_notification_host: hostingUser.username,
+                },
+                // the item definition that we will use as template, we will use a fragment
+                itemDefinition: "cms/fragment",
+                // the id of the item definition we want to use, this is a custom id
+                id: arg.newValue.status === "APPROVED" ? "APPROVAL_EMAIL" : "DENIAL_EMAIL",
+                // the version, so we have different versions per language
+                version: requesterUser.app_language,
+                // the property we want to pull from that item definition
+                property: "content",
+                // who we are sending to
+                to: requesterUser,
+              });
             }
 
             return null;
