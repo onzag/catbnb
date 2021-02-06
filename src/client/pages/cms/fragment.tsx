@@ -19,10 +19,69 @@ import {
 } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
-import { ITemplateArgsContext } from "@onzag/itemize/client/fast-prototyping/components/slate";
+import { ITemplateArgsRootContext, ITemplateArg } from "@onzag/itemize/client/fast-prototyping/components/slate";
 import Route from "@onzag/itemize/client/components/navigation/Route";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import { LanguagePicker } from "@onzag/itemize/client/fast-prototyping/components/language-picker";
+import { ModuleProvider } from "@onzag/itemize/client/providers/module";
+
+const frontpageWrapper = (children: React.ReactNode) => {
+  return (
+    <ModuleProvider module="hosting">
+      <ItemProvider
+        itemDefinition="unit"
+        searchCounterpart={true}
+        properties={[
+          "address",
+          "unit_type",
+          "planned_check_in",
+          "planned_check_out",
+          "price",
+        ]}
+      >
+        {children}
+      </ItemProvider>
+    </ModuleProvider>
+  );
+}
+
+const frontpageProperties: {[key: string]: ITemplateArg} = {
+  check_in_date_entry: {
+    label: "Check in date Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="planned_check_in" />),
+  },
+  check_out_date_entry: {
+    label: "Check out date Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="planned_check_out" />),
+  },
+  location_entry: {
+    label: "Location Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="address" searchVariant="location" />),
+  },
+  search_radius_entry: {
+    label: "Search Radius Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="address" searchVariant="radius" />),
+  },
+  unit_type_entry: {
+    label: "Unit Type Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="unit_type" searchVariant="search" />),
+  },
+  min_price_entry: {
+    label: "Min Price Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="price" searchVariant="from"/>),
+  },
+  max_price_entry: {
+    label: "Max Price Entry",
+    type: "html",
+    htmlDisplay: (<Entry id="price" searchVariant="to"/>),
+  },
+};
 
 /**
  * The most important bit that defines what fragments are available to modify
@@ -32,7 +91,7 @@ import { LanguagePicker } from "@onzag/itemize/client/fast-prototyping/component
  * in cms/index.propext.json you can find out the content property and what it
  * supports
  */
-const FRAGMENTS: { [key: string]: ITemplateArgsContext } = {
+const FRAGMENTS: { [key: string]: ITemplateArgsRootContext } = {
   /**
    * In this example you can see the header, the header uses a custom ID
    * and is loaded in the frontpage by passing it as ID for the fragment
@@ -49,7 +108,14 @@ const FRAGMENTS: { [key: string]: ITemplateArgsContext } = {
   "HEADER": {
     type: "context",
     label: "Header",
-    properties: {},
+    wrapper: frontpageWrapper,
+    properties: frontpageProperties,
+  },
+  "BODY": {
+    type: "context",
+    label: "Body",
+    wrapper: frontpageWrapper,
+    properties: frontpageProperties,
   },
   "ACCOUNT_VALIDATION_EMAIL": {
     type: "context",
@@ -156,7 +222,7 @@ const FragmentIndex = withStyles(fragmentStyles)((props: WithStyles<typeof fragm
                   <ListItemIcon>
                     <ExtensionIcon />
                   </ListItemIcon>
-                  <ListItemText primary={fragmentContext.label} secondary={f}/>
+                  <ListItemText primary={fragmentContext.label} secondary={f} />
                 </ListItem>
               </Link>
             );
@@ -225,7 +291,7 @@ const SingleFragment = withStyles(fragmentStyles)((props: ISingleFragmentProps) 
               <Paper className={props.classes.paper}>
                 <Box className={props.classes.box}>
                   <LanguagePicker
-                    currentCode={locationState.version || null}
+                    currentCode={locationState.version || null}
                     allowUnspecified={true}
                     handleLanguageChange={updateVersionState}
                   />
