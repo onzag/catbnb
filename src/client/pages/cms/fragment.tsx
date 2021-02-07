@@ -59,7 +59,7 @@ const frontpageProperties: {[key: string]: ITemplateArg} = {
   location_entry: {
     label: "Location Entry",
     type: "html",
-    htmlDisplay: (<Entry id="address" searchVariant="location" />),
+    htmlDisplay: (<Entry id="address" searchVariant="location" rendererArgs={{disableMapAndSearch: true}}/>),
   },
   search_radius_entry: {
     label: "Search Radius Entry",
