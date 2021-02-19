@@ -45,7 +45,7 @@ const frontpageWrapper = (children: React.ReactNode) => {
   );
 }
 
-const buttonUIHandler = (props: ISlateTemplateUIHandlerProps) => {
+export const buttonUIHandler = (props: ISlateTemplateUIHandlerProps) => {
   return (
     <Button
       variant={props.args.type}

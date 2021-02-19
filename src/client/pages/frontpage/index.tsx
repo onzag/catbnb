@@ -6,6 +6,7 @@ import View from "@onzag/itemize/client/components/property/View";
 import { ModuleProvider } from "@onzag/itemize/client/providers/module";
 import AppLanguageRetriever from "@onzag/itemize/client/components/localization/AppLanguageRetriever";
 import { ItemProvider } from "@onzag/itemize/client/providers/item";
+import { buttonUIHandler } from "../cms/fragment";
 
 const templateArgs = {
   check_in_date_entry: <Entry id="planned_check_in" />,
@@ -15,6 +16,7 @@ const templateArgs = {
   unit_type_entry: <Entry id="unit_type" searchVariant="search" />,
   min_price_entry: <Entry id="price" searchVariant="from" />,
   max_price_entry: <Entry id="price" searchVariant="to" />,
+  button: buttonUIHandler,
 }
 
 const templateContextWrapper = (children: React.ReactNode) => {
