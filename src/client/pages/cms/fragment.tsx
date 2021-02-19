@@ -15,11 +15,11 @@ import SubmitActioner from "@onzag/itemize/client/components/item/SubmitActioner
 import {
   Paper, createStyles, withStyles, WithStyles,
   Container, Box, List, ListItem, ListItemText,
-  ExtensionIcon, ListItemIcon,
+  ExtensionIcon, ListItemIcon, Button,
 } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
-import { ITemplateArgsRootContext, ITemplateArg } from "@onzag/itemize/client/fast-prototyping/components/slate";
+import { ITemplateArgsRootContext, ITemplateArg, ISlateTemplateUIHandlerProps, IToolbarPrescenseElement } from "@onzag/itemize/client/fast-prototyping/components/slate";
 import Route from "@onzag/itemize/client/components/navigation/Route";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import { LanguagePicker } from "@onzag/itemize/client/fast-prototyping/components/language-picker";
@@ -44,6 +44,37 @@ const frontpageWrapper = (children: React.ReactNode) => {
     </ModuleProvider>
   );
 }
+
+const buttonUIHandler = (props: ISlateTemplateUIHandlerProps) => {
+  return (
+    <Button
+      variant={props.args.type}
+      color={props.args.color}
+      className={props.className}
+      style={props.style}
+      {...props.attributes}
+      {...props.events}
+    >
+      {props.children}
+    </Button>
+  );
+}
+
+const toolbarExtras: IToolbarPrescenseElement[] = [
+  {
+    element: {
+      type: "paragraph",
+      containment: "block",
+      children: [],
+      uiHandler: "button",
+      uiHandlerArgs: {
+        type: "contained",
+        color: "primary",
+      },
+    },
+    icon: <ExtensionIcon />,
+  },
+];
 
 const frontpageProperties: {[key: string]: ITemplateArg} = {
   check_in_date_entry: {
@@ -81,6 +112,11 @@ const frontpageProperties: {[key: string]: ITemplateArg} = {
     type: "html",
     htmlDisplay: (<Entry id="price" searchVariant="to"/>),
   },
+  button: {
+    label: "Button",
+    type: "ui-handler",
+    handler: buttonUIHandler,
+  }
 };
 
 /**
@@ -302,6 +338,7 @@ const SingleFragment = withStyles(fragmentStyles)((props: ISingleFragmentProps) 
                   id="content"
                   rendererArgs={{
                     context: FRAGMENTS[fragmentId] || null,
+                    toolbarExtras,
                   }}
                 />
 
