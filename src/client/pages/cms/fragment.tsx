@@ -19,13 +19,14 @@ import {
 } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
-import { ITemplateArgsRootContext, ITemplateArg, ISlateTemplateUIHandlerProps, IToolbarPrescenseElement } from "@onzag/itemize/client/fast-prototyping/components/slate";
+import { ITemplateArgsRootContext, ITemplateArg, ISlateTemplateUIHandlerProps,
+  IToolbarPrescenseElement, IDrawerUIHandlerConfiguratorElement } from "@onzag/itemize/client/fast-prototyping/components/slate";
 import Route from "@onzag/itemize/client/components/navigation/Route";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import { LanguagePicker } from "@onzag/itemize/client/fast-prototyping/components/language-picker";
 import { ModuleProvider } from "@onzag/itemize/client/providers/module";
 
-const frontpageWrapper = (children: React.ReactNode) => {
+function frontpageWrapper(children: React.ReactNode) {
   return (
     <ModuleProvider module="hosting">
       <ItemProvider
@@ -75,6 +76,51 @@ const toolbarExtras: IToolbarPrescenseElement[] = [
     icon: <ExtensionIcon />,
   },
 ];
+
+const drawerUIHandlerExtras: IDrawerUIHandlerConfiguratorElement[] = [
+  {
+    uiHandler: "button",
+    arg: "type",
+    input: {
+      type: "select",
+      label: "button type",
+      placeholder: "button type",
+      options: [
+        {
+          label: "contained",
+          value: "contained",
+        },
+        {
+          label: "text",
+          value: "text",
+        },
+        {
+          label: "outlined",
+          value: "outlined",
+        }
+      ],
+    }
+  },
+  {
+    uiHandler: "button",
+    arg: "color",
+    input: {
+      type: "select",
+      label: "button color",
+      placeholder: "button color",
+      options: [
+        {
+          label: "primary",
+          value: "primary",
+        },
+        {
+          label: "secondary",
+          value: "secondary",
+        }
+      ],
+    }
+  }
+]
 
 const frontpageProperties: {[key: string]: ITemplateArg} = {
   check_in_date_entry: {
@@ -339,6 +385,7 @@ const SingleFragment = withStyles(fragmentStyles)((props: ISingleFragmentProps) 
                   rendererArgs={{
                     context: FRAGMENTS[fragmentId] || null,
                     toolbarExtras,
+                    drawerUIHandlerExtras,
                   }}
                 />
 
