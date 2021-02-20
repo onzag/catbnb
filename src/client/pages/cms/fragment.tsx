@@ -52,7 +52,13 @@ export const buttonUIHandler = (props: ISlateTemplateUIHandlerProps) => {
       variant={props.args.type}
       color={props.args.color}
       className={props.className}
-      style={props.style}
+      style={props.isSlate ? {...props.style, cursor: "text"} : props.style}
+      TouchRippleProps={props.isSlate ? {
+        contentEditable: false,
+        style: {
+          userSelect: "none",
+        }
+      } : null}
       {...props.attributes}
       {...props.events}
     >
