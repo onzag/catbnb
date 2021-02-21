@@ -16,7 +16,20 @@ const templateArgs = {
   unit_type_entry: <Entry id="unit_type" searchVariant="search" />,
   min_price_entry: <Entry id="price" searchVariant="from" />,
   max_price_entry: <Entry id="price" searchVariant="to" />,
-  button: buttonUIHandler,
+  randomLoop: [
+    {
+      button: <button>hello</button>
+    },
+    {
+      button: <button>world</button>
+    },
+    {
+      button: <button>kitty</button>
+    },
+    {
+      button: <button>cat</button>
+    }
+  ]
 }
 
 const templateContextWrapper = (children: React.ReactNode) => {
