@@ -19,10 +19,8 @@ import {
 } from "@onzag/itemize/client/fast-prototyping/mui-core";
 import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/buttons";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
-import {
-  ITemplateArgsRootContext, ITemplateArg, ISlateTemplateUIHandlerProps,
-  IToolbarPrescenseElement, IDrawerUIHandlerConfiguratorElement, ITemplateArgsContext
-} from "@onzag/itemize/client/fast-prototyping/components/slate";
+import { ITemplateArgsRootContext, ITemplateArg, ISlateTemplateUIHandlerProps,
+  IToolbarPrescenseElement, IDrawerUIHandlerConfiguratorElement } from "@onzag/itemize/client/fast-prototyping/components/slate";
 import Route from "@onzag/itemize/client/components/navigation/Route";
 import Link from "@onzag/itemize/client/components/navigation/Link";
 import { LanguagePicker } from "@onzag/itemize/client/fast-prototyping/components/language-picker";
@@ -54,7 +52,7 @@ export const buttonUIHandler = (props: ISlateTemplateUIHandlerProps) => {
       variant={props.args.type}
       color={props.args.color}
       className={props.className}
-      style={props.isSlate ? { ...props.style, cursor: "text" } : props.style}
+      style={props.isSlate ? {...props.style, cursor: "text"} : props.style}
       TouchRippleProps={props.isSlate ? {
         contentEditable: false,
         style: {
@@ -130,7 +128,7 @@ const drawerUIHandlerExtras: IDrawerUIHandlerConfiguratorElement[] = [
   }
 ]
 
-const frontpageProperties: { [key: string]: ITemplateArg | ITemplateArgsContext } = {
+const frontpageProperties: {[key: string]: ITemplateArg} = {
   check_in_date_entry: {
     label: "Check in date Entry",
     type: "html",
@@ -144,7 +142,7 @@ const frontpageProperties: { [key: string]: ITemplateArg | ITemplateArgsContext 
   location_entry: {
     label: "Location Entry",
     type: "html",
-    htmlDisplay: (<Entry id="address" searchVariant="location" rendererArgs={{ disableMapAndSearch: true }} />),
+    htmlDisplay: (<Entry id="address" searchVariant="location" rendererArgs={{disableMapAndSearch: true}}/>),
   },
   search_radius_entry: {
     label: "Search Radius Entry",
@@ -159,29 +157,17 @@ const frontpageProperties: { [key: string]: ITemplateArg | ITemplateArgsContext 
   min_price_entry: {
     label: "Min Price Entry",
     type: "html",
-    htmlDisplay: (<Entry id="price" searchVariant="from" />),
+    htmlDisplay: (<Entry id="price" searchVariant="from"/>),
   },
   max_price_entry: {
     label: "Max Price Entry",
     type: "html",
-    htmlDisplay: (<Entry id="price" searchVariant="to" />),
+    htmlDisplay: (<Entry id="price" searchVariant="to"/>),
   },
   button: {
     label: "Button",
     type: "ui-handler",
     handler: buttonUIHandler,
-  },
-  randomLoop: {
-    type: "context",
-    label: "random loop",
-    loopable: true,
-    properties: {
-      button: {
-        label: "Random button",
-        type: "html",
-        htmlDisplay: <button>here some button</button>
-      }
-    }
   }
 };
 
