@@ -10,11 +10,204 @@ import { SubmitButton } from "@onzag/itemize/client/fast-prototyping/components/
 import SubmitActioner from "@onzag/itemize/client/components/item/SubmitActioner";
 import Snackbar from "@onzag/itemize/client/fast-prototyping/components/snackbar";
 import Reader from "@onzag/itemize/client/components/property/Reader";
-import { getToday, parseDate } from "@onzag/itemize/util";
+import { createUnitValue, getToday, parseDate } from "@onzag/itemize/util";
 import SetVar from "@onzag/itemize/client/components/util/SetVar";
 import ReadVar from "@onzag/itemize/client/components/util/ReadVar";
 import SearchLoader from "@onzag/itemize/client/components/search/SearchLoader";
 import LocationStateReader from "@onzag/itemize/client/components/navigation/LocationStateReader";
+import { TemplateArgs, MutatingTemplateArgs, MutatingFunctionArg } from "@onzag/itemize/client/internal/text/serializer/template-args";
+import { button } from "../../components/ui-handlers";
+import AppLanguageRetriever from "@onzag/itemize/client/components/localization/AppLanguageRetriever";
+import I18nRead from "@onzag/itemize/client/components/localization/I18nRead";
+import SearchActioner from "@onzag/itemize/client/components/search/SearchActioner";
+import Link from "@onzag/itemize/client/components/navigation/Link";
+
+/**
+ * These are our search arguments
+ */
+const searchArgs = {
+  limit: 50,
+  offset: 0,
+  requestedProperties: [
+    "address",
+    "title",
+    "unit_type",
+    "price",
+    "image",
+  ],
+  searchByProperties: [
+    "address",
+    "unit_type",
+    "planned_check_in",
+    "planned_check_out",
+    "price",
+  ],
+  traditional: true,
+  storeResultsInNavigation: "search-results",
+};
+
+/**
+ * This is the wrapper that will wrap the entire template mechanism
+ * all our template html will be under this
+ */
+const templateContextWrapper = (children: React.ReactNode) => {
+  return (
+    <ModuleProvider module="hosting">
+      <ItemProvider
+        itemDefinition="unit"
+        searchCounterpart={true}
+        properties={[
+          "address",
+          "unit_type",
+          "planned_check_in",
+          "planned_check_out",
+          "price",
+        ]}
+        setters={[
+          {
+            id: "address",
+            searchVariant: "radius",
+            value: createUnitValue(50, "km", "km"),
+          }
+        ]}
+
+        // we will automatically search when hitting this page
+        // but only the first time
+        automaticSearch={searchArgs}
+        automaticSearchIsOnlyInitial={true}
+        loadSearchFromNavigation="search-results"
+      >
+        {children}
+      </ItemProvider>
+    </ModuleProvider>
+  );
+}
+
+/**
+ * These are the template args for our search result, a single
+ * one, each one of them in the loop, yes they are all the same
+ * because they are contextual, so they don't need to be recalculated in the context
+ */
+const searchResultTemplateArgs = new TemplateArgs({
+  address: <View id="address" rendererArgs={{ hideMap: true }} />,
+  title: <View id="title" />,
+  unit_type: <View id="unit_type" />,
+  unit_price: <View id="price" />,
+  image: <View id="image" rendererArgs={{ imageClassName: "element-view", disableImageLinking: true }} />,
+
+  // this is an uncommon way to handle a function but also possible
+  // instead of passing a function we pass null and handle it ourselves as a link
+  // component
+  go_to_view_listing: new MutatingFunctionArg((children) => {
+    // we can even handle events differently if we fancy
+    // we are not even passing a function we just wrap the component
+    // in a link
+    return (
+      <Reader id="id">
+        {(id: string) => (
+          <Link to={`/reserve/${id}`}>
+            {children(null)}
+          </Link>
+        )}
+      </Reader>
+    );
+  })
+});
+
+/**
+ * These are our root template args for the search where we define our entries
+ * that were specified by the designer and how they are assigned as html content
+ */
+const templateArgs = new TemplateArgs({
+  check_in_date_entry: <Entry id="planned_check_in" />,
+  check_out_date_entry: <Entry id="planned_check_out" />,
+  location_entry: <Entry id="address" searchVariant="location" rendererArgs={{ disableMapAndSearch: true }} />,
+  search_radius_entry: <Entry id="address" searchVariant="radius" />,
+  unit_type_entry: <Entry id="unit_type" searchVariant="search" />,
+  min_price_entry: <Entry id="price" searchVariant="from" />,
+  max_price_entry: <Entry id="price" searchVariant="to" />,
+  // this is our good old ui handler
+  button,
+
+  // and this is special this is the perform search function, now as you know
+  // we need to use the SearchActioner in order to trigger a search within a
+  // item context, so we create a mutating function arg where we can grab
+  // this context and pass the function to the children they will recognize that
+  // the function is about that
+  perform_search: new MutatingFunctionArg((children) => {
+    return (
+      <SearchActioner>
+        {(actioner) => {
+          const fn = () => actioner.search(searchArgs);
+          return children(fn);
+        }}
+      </SearchActioner>
+    );
+  }),
+
+  // now the search results are also dynamic and they vary and we retrieve
+  // them from our search loader, so they are mutating as well, this is a loopable
+  // element if you remember, but for what template args consists
+  // there's no dinstintion, you must simply return an array and call the children
+  // as many times as they are required with the new context that they are in
+  search_results: new MutatingTemplateArgs((children) => {
+    return (
+      <SearchLoader
+        currentPage={0}
+        pageSize={50}
+        cleanOnDismount={true}
+      >
+        {(loader) => {
+          return loader.searchRecords.map((r) => (
+            <ItemProvider {...r.providerProps}>
+              {children(searchResultTemplateArgs)}
+            </ItemProvider>
+          ));
+        }}
+      </SearchLoader>
+    );
+  })
+}).wrappedBy(templateContextWrapper);
+
+export function ReserveHostingSearch() {
+  return (
+    <>
+      <I18nRead id="app_name" capitalize={true}>
+        {(i18nAppName: string) => {
+          return (
+            <TitleSetter>
+              {i18nAppName}
+            </TitleSetter>
+          );
+        }}
+      </I18nRead>
+      <div className="trusted">
+        <ModuleProvider module="cms">
+          <AppLanguageRetriever>
+            {(languageData) => (
+              <ItemProvider
+                itemDefinition="fragment"
+                forId="RESERVE_SEARCH"
+                forVersion={languageData.currentLanguage.code}
+                loadUnversionedFallback={true}
+                longTermCaching={true}
+                properties={
+                  [
+                    "content",
+                    "attachments",
+                  ]
+                }
+                static="NO_LISTENING"
+              >
+                <View id="content" rendererArgs={{ makeTemplate: true, templateArgs }} />
+              </ItemProvider>
+            )}
+          </AppLanguageRetriever>
+        </ModuleProvider>
+      </div>
+    </>
+  );
+}
 
 interface IReserveHostingProps {
   match: {
@@ -217,7 +410,7 @@ export function ReserveHosting(props: IReserveHostingProps) {
                         return checkOutTheUserWants.isAfter(checkIn) && checkOutTheUserWants.isSameOrBefore(checkOut);
                       });
                     }
-                    return <Entry id="check_out" rendererArgs={{ shouldDisableDate }} prefillWith={state.checkOut}/>
+                    return <Entry id="check_out" rendererArgs={{ shouldDisableDate }} prefillWith={state.checkOut} />
                   }}
                 </ReadVar>
               )}

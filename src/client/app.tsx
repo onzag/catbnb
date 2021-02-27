@@ -27,7 +27,7 @@ import { RecoverDialog } from "./components/recover-dialog";
 import HomeWorkIcon from "@material-ui/icons/HomeWork";
 import EventSeatIcon from '@material-ui/icons/EventSeat';
 import { Hosting } from "./pages/hosting";
-import { ReserveHosting } from "./pages/reserve";
+import { ReserveHosting, ReserveHostingSearch } from "./pages/reserve";
 import { Reservations } from "./pages/reservations";
 import { ItemProvider } from "@onzag/itemize/client/providers/item";
 import UserDataRetriever from "@onzag/itemize/client/components/user/UserDataRetriever";
@@ -171,6 +171,7 @@ export default function App() {
 
       <Route path="/hosting" component={Hosting} />
 
+      <Route path="/reserve" component={ReserveHostingSearch} exact={true} />
       <Route path="/reserve/:id" component={ReserveHosting} exact={true} />
       <Route path="/reserve/:id/request/:rid" component={ReserveHosting} exact={true} />
 

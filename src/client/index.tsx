@@ -5,6 +5,7 @@ import { rendererContext } from "@onzag/itemize/client/fast-prototyping/renderer
 import { appWrapper, mainWrapper } from "@onzag/itemize/client/fast-prototyping/wrappers";
 
 import "./rich-extensions.scss";
+import "./base.scss";
 
 initializeItemizeApp(
   // the renderer context specifies how property components (viewers and editors) are

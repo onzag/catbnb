@@ -39,7 +39,7 @@ const hostingStyles = createStyles({
 });
 
 /**
- * Page to add or edit a hosting unit
+ * Page for reservations
  */
 export const Reservations = withStyles(hostingStyles)((props: WithStyles<typeof hostingStyles>) => {
   return (
