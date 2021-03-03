@@ -197,6 +197,8 @@ export const ViewHosting = withStyles(viewHostingStyles)((props: IViewHostingPro
     <ItemProvider
       itemDefinition="unit"
       forId={idToView}
+      longTermCaching={true}
+      markForDestructionOnLogout={true}
       properties={[
         "title",
         "image",
@@ -214,7 +216,7 @@ export const ViewHosting = withStyles(viewHostingStyles)((props: IViewHostingPro
 
       <View id="unit_type" />
       <View id="title" />
-      <View id="image" />
+      <View id="image" cacheFiles={true} />
 
       <Reader id="booked">
         {(booked: boolean) => {
@@ -399,6 +401,9 @@ export function NewEditHosting(props: INewEditHostingProps) {
       // we are adding the id here that we plan to load
       // the null slot is the same as not specified
       forId={idToEdit}
+      // we add long term caching here as specified
+      // in the section about caching
+      longTermCaching={true}
       // these are the properties that
       // we have a state for
       properties={[
@@ -612,6 +617,11 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
               limit: 500,
               // we specify that the creator must be us
               createdBy: userData.id,
+              // we specify a cache policy
+              cachePolicy: "by-owner",
+              // our data is sensitive do not keep on the cache
+              // when the user logs out
+              markForDestructionOnLogout: true,
             }
           }
           // this is the memory management that is defined in itemize itself
@@ -662,6 +672,7 @@ const UnitList = withStyles(unitListStyles)((props: WithStyles<typeof unitListSt
                                         imageClassName: props.classes.image,
                                       }
                                     }
+                                    cacheFiles={true}
                                   />
                                   <ListItemText
                                     className={props.classes.listingText}

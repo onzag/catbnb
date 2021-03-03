@@ -59,6 +59,15 @@ initializeServer(
           },
         ],
       },
+      "reserve/:id": {
+        crawable: true,
+        collect: [
+          {
+            module: "hosting",
+            item: "unit",
+          },
+        ],
+      }
     },
   },
   {
